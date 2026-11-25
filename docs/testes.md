@@ -23,14 +23,14 @@ flowchart TB
 
 | Tipo | Onde | Comando | Precisa |
 |---|---|---|---|
-| Unitários | `api/src/**/*.test.ts`, ao lado do código | `make tests` | Nada (sem banco) |
+| Unitários | `api/src/**/*.test.ts`, ao lado do código, e `tests/harness/` (scripts do harness) | `make tests` | Nada (sem banco) |
 | Integração | `api/test/integration/` | `make test-integration` | `make up` |
 | Caixa-preta | `blackbox/tests/` | `make test-blackbox` | `make up` |
 | e2e (fluxo do avaliador) | `tests/e2e/` | `make test-e2e` | Docker livre para duas cópias extras |
 
 ## Unitários
 
-Rodam com Vitest e sem banco: os serviços recebem repositórios falsos no construtor. São a G3 dos gates. Todo serviço em `api/src/services/` tem um `*.test.ts` ao lado.
+Rodam com Vitest e sem banco: os serviços recebem repositórios falsos no construtor. São a G3 dos gates. Todo serviço em `api/src/services/` tem um `*.test.ts` ao lado. O `make tests` também roda `tests/harness/` (com `node --test`), que testa o gerador de sumário.
 
 ```bash
 make tests

@@ -4,11 +4,12 @@
     ".": {
       "entry": [
         "scripts/**/*.mjs",
-        "tests/e2e/**/*.{ts,mjs}"
+        "tests/e2e/**/*.mjs",
+        "tests/harness/**/*.mjs"
       ],
       "project": [
         "scripts/**/*.mjs",
-        "tests/e2e/**/*.{ts,mjs}"
+        "tests/**/*.mjs"
       ]
     },
     "api": {

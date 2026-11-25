@@ -186,7 +186,7 @@ Cada fase termina com um commit (um commit por tarefa). As fases 4 e 5 vêm ante
 ### Fase 3: imagens Docker multi-arquitetura
 
 1. `api/Dockerfile` (API, worker e job de migrate/seed) e `web/Dockerfile` (Vite dev), com base `node:22-bookworm-slim` (imagem oficial, multi-arquitetura).
-2. Prisma: `binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]` no `schema.prisma`, sem nova migration (só muda o gerador).
+2. Prisma: o client é gerado dentro da imagem (`prisma generate` no build), para a plataforma dela; assim não é preciso mexer em `binaryTargets` no `schema.prisma`.
 3. `make build`: build local para a arquitetura da máquina (`docker compose build`).
 4. `make images`: `docker buildx build --platform linux/amd64,linux/arm64`, para validar as duas arquiteturas.
 5. Matriz de compatibilidade documentada em `docs/`: Ubuntu 22.04/24.04/26.04 amd64 rodam `linux/amd64`; macOS Intel roda `linux/amd64` e macOS Apple Silicon roda `linux/arm64` dentro da VM do Colima.
@@ -207,8 +207,8 @@ Proposta (cada uma com motivação documentada e exemplo versionado em `harness/
 | ID | Regra | Motivação | Ferramenta |
 |---|---|---|---|
 | G11 | Nada de endereço fixo (`localhost:<porta>`, `127.0.0.1`, `/tmp/`) em `api/src/` e `web/src/` fora de `config/` | Endereço fixo quebrou as duas worktrees: CORS, URL da API e pasta de anexos | ESLint `no-restricted-syntax` em literais e template strings |
-| G12 | `new PrismaClient` só em `api/src/repositories/prisma.ts` | O worker criava um cliente próprio lendo `process.env` e ignorava a configuração central | dependency-cruiser ou ESLint `no-restricted-syntax` |
-| G13 (opcional) | Nenhum comentário de supressão (`eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`) em `api/src/` e `web/src/` | Supressão esconde violação, e o avaliador procura por elas | ESLint `eslint-comments/no-use` ou script |
+| G12 | `@prisma/client` só é importado em `api/src/repositories/` | O worker criava um cliente próprio lendo `process.env` e ignorava a configuração central | dependency-cruiser |
+| G13 | Nenhum comentário de supressão (`eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`) em `api/src/` e `web/src/` | Supressão esconde violação, e o avaliador procura por elas | busca em `scripts/gates.mjs` + `noInlineConfig` no ESLint |
 
 O README explica como aplicar cada exemplo: `bash kit-gates/verificar.sh . "make gates"` apontando para a pasta das violações próprias, ou `git apply harness/violacoes-proprias/<regra>.patch && make gates`.
 
@@ -327,7 +327,6 @@ Toda a documentação é em pt-BR, com TOC no início de cada `.md`.
 | `.gitignore` | adicionar `.run/` e `web/.env` |
 | `api/.env.example`, `web/.env.example` | atualizar/criar |
 | `api/prisma/seed.ts` | tornar idempotente |
-| `api/prisma/schema.prisma` | só `binaryTargets` do gerador |
 | `api/src/**`, `web/src/**` | refatorar (Fase 6), sem mudar pastas e entradas fixas |
 | `harness/violacoes-proprias/` | criar |
 | `api/test/integration/*`, `tests/e2e/*` | criar |
