@@ -5,7 +5,7 @@
 	gates-proprias gates-extras tests test-integration test-blackbox test-e2e toc images
 
 help: ## Lista os alvos disponíveis
-	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_-]+:.*## / {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 check-os: ## Confere se o sistema operacional é suportado (Ubuntu 22.04/24.04/26.04 amd64, macOS amd64/arm64)
 	@bash scripts/check-os.sh
@@ -43,7 +43,7 @@ gates-proprias: ## Aplica os exemplos de violação das regras próprias e confe
 gates-extras: ## Aplica as violações extras (outras formas de G1-G10) e confere que os gates falham
 	@bash scripts/verificar-violacoes.sh harness/violacoes-extras
 
-tests: ## Testes unitários da API (sem banco)
+tests: ## Testes unitários da API (sem banco) e dos scripts do harness
 	@bash scripts/tests.sh
 
 test-integration: ## Testes de integração da API (banco balcao_test desta cópia; precisa de make up)

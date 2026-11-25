@@ -56,8 +56,9 @@ confere 'mk "$A" up >/dev/null 2>&1' "segunda subida sem derrubar termina sem er
 API_A="http://localhost:$(porta "$A" API_PORT)"
 WEB_A="http://localhost:$(porta "$A" WEB_PORT)"
 for conta in "admin@balcao.dev Admin@123" "agente@balcao.dev Agente@123" "cliente@balcao.dev Cliente@123"; do
-  set -- $conta
-  confere 'entra "$API_A" "$1" "$2"' "$1 entra na copia-a depois da segunda subida"
+  EMAIL=${conta% *}
+  SENHA=${conta#* }
+  confere 'entra "$API_A" "$EMAIL" "$SENHA"' "$EMAIL entra na copia-a depois da segunda subida"
 done
 confere '[ "$(git -C "$A" config core.hooksPath)" = ".githooks" ]' "hook ativo depois da subida"
 
