@@ -20,7 +20,7 @@ Vários agentes trabalham ao mesmo tempo, cada um na sua worktree, e provam sozi
 ```mermaid
 flowchart TD
   A[nova tarefa] --> B[git worktree add ../tarefa-x]
-  B --> C[cd ../tarefa-x && make up]
+  B --> C["cd ../tarefa-x && make up"]
   C --> D[ler AGENTS.md e o doc de docs/ da área]
   D --> E[mudar o código]
   E --> F[make gates]
