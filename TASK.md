@@ -25,8 +25,6 @@ Esforço de referência: de 5 a 8 horas, somando o tempo dos agentes e o seu.
 
 ## O Balcão hoje
 
-Repositório base: https://github.com/devfullcycle/mba-ia-desafio-harness-legado
-
 ```
 api/                     API (Express + Prisma + Postgres) e worker de triagem
   prisma/                schema, migrations e seed
@@ -279,3 +277,20 @@ O agente lê o arquivo de instruções (`CLAUDE.md` ou equivalente) quando a ses
 Rode o `kit-gates/` de novo sempre que mexer na configuração de uma ferramenta de gate: uma opção errada pode desligar uma regra sem nenhum aviso, e os gates continuam passando.
 
 Harness bom não é o que barra mais; é o que faz o próximo agente acertar de primeira.
+
+# Pedidos adicionais
+
+- Crie o arquivo CLAUDE.md para registrar as instruções e guardails para manter o conteúdo do repositório atualizado e consistente com o especificado no arquivo TASK.md
+- No PLAN.md deve ser adicionado para gerar imagens docker compativeis com Ubuntu (22.04, 24.04, 26.04) (amd64) e MacOS (amd64 e arm64). O sistema operacional suportado deve ser checado no makefile e no CLAUDE.md deve ter instruções para atualizar as dependencias de software para as versões mais recentes quando for explicitamente solicitado no futuro.
+- Adicione ao PLAN.md a criação de um arquivo CONTRIBUTING.md e REQUIREMENTS.md por sistema operacional (mas deve ter um REQUIREMENTS.md generico que redirecione para o arquivo adequado) com instruções para executar o makefile para checar o S.O e checar/instalar dependencias e também instruções oficiais para instalar as dependencias de acordo com o S.O caso alguém queria fazer manualmente. A manutenção desses arquivos de requirements deve estar incluído no CLAUDE.md para quando alguém solicitar explicitamente a atualização dos softwares.
+- No PLAN.md para o macOS troque o uso de Docker Desktop por Colima
+- Adicione o TOC - Table of Content no início de cada arquivo .md e registre isso no CLAUDE.md
+- Adicione na documentação diagramas mermaid explicando o funcionamento da arquitetura, fluxo de trabalho da API e dos agentes, testes, classes e o que mais for necessario para um iniciante. Use analogias para facilitar o entendimento. A criação e atualização dos diagramas e conteúdo da doc com analogias deve estar registrado no CLAUDE.md
+- Ajuste o script que gera o TOC para ser idepotente não repetir table of content em arquivos que já existe e o TOC deve ser compativel com plugins de Markdown que geram TOC, ou seja colocar sumário entre duas tags <!-- TOC -->. Usar <!-- /TOC --> está entrando em conflito com plugins
+
+- Makefile com comandos `make up` para subir as aplicações e o que mais for necessário. Exemplos: `make check-dependencies`, `make install`, `make tests`, `make build`, `make down` para parar o projeto, etc.
+- Mise para gerenciar dependências de software (o docker e docker-compose são instalados pelo sistema operacional, não pelo mise). O make install deve apenas instalar o mise e as dependências do projeto, sem instalar nada globalmente. Para o Docker e o docker-compose, basta informar a URL de download e instalação oficial.
+- Use informações oficiais.
+- Implemente testes de integração para a API, que cobrem os fluxos do avaliador.
+- Documentação em pt-BR, com README.md na raiz do repositório, substituindo o conteúdo inicial e apontando para uma pasta `docs`.
+- Ao final, revise todas as especificações e teste tudo para garantir que a entrega está completa.
