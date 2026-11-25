@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Hook de pre-commit do Balcão: bloqueia o commit se os gates rápidos falharem.
+# Roda: tipos (G1, tsc em api/ e web/), lint (G2, G5, G11, ESLint) e supressões (G13).
+# É ativado por `make up` / `make install` (git config core.hooksPath .githooks).
+# Os gates completos (testes, camadas, código morto) rodam com `make gates`.
+set -euo pipefail
+RAIZ=$(git rev-parse --show-toplevel)
+# shellcheck source=../scripts/lib/comum.sh
+source "$RAIZ/scripts/lib/comum.sh"
+cd "$RAIZ"
+usar_node
+
+if ! node scripts/gates.mjs --only=tipos,lint,supressoes; then
+  echo
+  erro "commit bloqueado pelos gates. Corrija as violações acima (detalhes: docs/gates.md)."
+  exit 1
+fi
