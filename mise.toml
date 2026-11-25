@@ -1,0 +1,4 @@
+# Ferramentas de runtime gerenciadas pelo mise (https://mise.jdx.dev).
+# Docker e Docker Compose NÃO são gerenciados aqui: instale pelo sistema operacional.
+[tools]
+node = "26.13.1"

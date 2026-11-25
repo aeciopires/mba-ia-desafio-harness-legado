@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/**/*.mjs",
+        "tests/e2e/**/*.{ts,mjs}"
+      ],
+      "project": [
+        "scripts/**/*.mjs",
+        "tests/e2e/**/*.{ts,mjs}"
+      ]
+    },
+    "api": {
+      "entry": [
+        "src/**/*.test.ts",
+        "test/integration/**/*.test.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "prisma/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    "web": {
+      "project": [
+        "src/**/*.{ts,tsx}"
+      ]
+    }
+  },
+  "rules": {
+    "files": "error",
+    "dependencies": "error",
+    "devDependencies": "error",
+    "optionalPeerDependencies": "error",
+    "unlisted": "error",
+    "binaries": "error",
+    "unresolved": "error",
+    "exports": "error",
+    "nsExports": "error",
+    "types": "error",
+    "nsTypes": "error",
+    "enumMembers": "error",
+    "duplicates": "error"
+  }
+}

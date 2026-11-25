@@ -1,3 +1,7 @@
 node_modules
 .env
 dist
+coverage
+*.tsbuildinfo
+# estado local de cada cópia (portas, anexos, logs) criado por make up
+.run/
