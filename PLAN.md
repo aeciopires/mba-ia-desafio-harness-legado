@@ -84,12 +84,12 @@ Decisão: **tudo em containers via Docker Compose**, com um projeto Compose por 
 
 | Recurso | Como é isolado |
 |---|---|
-| Portas | `scripts/lib/ports.sh` escolhe portas livres (API a partir de 4000, front a partir de 5173, Postgres a partir de 5432) e grava em `.run/ports.env`. A segunda subida reaproveita as portas gravadas. |
+| Portas | `scripts/lib/comum.sh` escolhe portas livres (API a partir de 4000, front a partir de 5173, Postgres a partir de 5432) e grava em `.run/ports.env`. A segunda subida reaproveita as portas gravadas. |
 | Banco | Um Postgres por cópia, volume nomeado pelo projeto Compose. |
 | Anexos | Pasta `.run/uploads/` dentro da cópia, montada no container da API. O caminho absoluto é informado na saída. |
 | Worker | Um container `worker` por projeto Compose, ligado ao banco da cópia. |
 | Front → API | `VITE_API_URL` gerado com a porta da API da cópia. A CORS da API usa `CORS_ORIGIN` com a porta do front da cópia. |
-| Configuração | `api/.env` e `web/.env` gerados pela subida a partir de `.env.example`, só se não existirem. `.run/` vai para o `.gitignore`. |
+| Configuração | A subida gera `.run/compose.env` (portas, pasta de anexos, UID/GID) e o `docker-compose.yml` passa as variáveis a cada container; `api/.env.example` e `web/.env.example` ficam para quem roda fora de container. `.run/` vai para o `.gitignore`. |
 
 ### 3.4 Ferramentas dos gates
 
@@ -172,7 +172,7 @@ Cada fase termina com um commit (um commit por tarefa). As fases 4 e 5 vêm ante
    - checa o sistema (aviso) e as dependências mínimas (Git, Docker, Compose, Node);
    - roda `npm ci` quando o `node_modules` não existe ou o lockfile mudou;
    - ativa o hook (`git config core.hooksPath .githooks`);
-   - escolhe ou reaproveita as portas (`.run/ports.env`), gera os `.env`;
+   - escolhe ou reaproveita as portas (`.run/ports.env`) e gera o `.run/compose.env`;
    - roda `docker compose -p <projeto> up -d --build --wait`;
    - espera `GET /api/health` responder;
    - imprime: URL da API, URL do front, banco (`postgresql://...:<porta>/balcao`), caminho absoluto da pasta de anexos e o nome do projeto Compose.
@@ -210,7 +210,7 @@ Proposta (cada uma com motivação documentada e exemplo versionado em `harness/
 | G12 | `@prisma/client` só é importado em `api/src/repositories/` | O worker criava um cliente próprio lendo `process.env` e ignorava a configuração central | dependency-cruiser |
 | G13 | Nenhum comentário de supressão (`eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`) em `api/src/` e `web/src/` | Supressão esconde violação, e o avaliador procura por elas | busca em `scripts/gates.mjs` + `noInlineConfig` no ESLint |
 
-O README explica como aplicar cada exemplo: `bash kit-gates/verificar.sh . "make gates"` apontando para a pasta das violações próprias, ou `git apply harness/violacoes-proprias/<regra>.patch && make gates`.
+O README explica como aplicar cada exemplo: `make gates-proprias` (`scripts/verificar-violacoes.sh` roda o `kit-gates/verificar.sh` com a pasta `harness/violacoes-proprias/`) ou copiando o `.modelo` para o caminho dele e rodando `make gates`. As 29 violações extras de G1 a G10 ficam em `harness/violacoes-extras/` (`make gates-extras`).
 
 ### Fase 6: correção do código guiada pelos gates
 
@@ -279,6 +279,7 @@ Toda a documentação é em pt-BR, com TOC no início de cada `.md`.
    - `docs/ambiente.md`: subida, isolamento por cópia, portas, banco, anexos, Colima;
    - `docs/gates.md`: cada regra, ferramenta, exemplos de violação e como corrigir;
    - `docs/testes.md`: unitários, integração, caixa-preta e e2e;
+   - `docs/fluxo-de-trabalho.md`: worktrees, hook, commits e incidentes, com o fluxo dos agentes;
    - `docs/incidentes.md`: registro de incidentes.
 7. **Diagramas Mermaid com analogias** (para iniciantes):
    - arquitetura em containers por cópia (analogia: cada worktree é um apartamento com a sua própria cozinha, geladeira e caixa de correio);
@@ -293,7 +294,7 @@ Toda a documentação é em pt-BR, com TOC no início de cada `.md`.
    - delimita o sumário com duas tags `<!-- TOC -->` (abertura e fechamento iguais, sem `<!-- /TOC -->`, para não conflitar com os plugins de Markdown);
    - se as tags já existem, substitui só o conteúdo entre elas; se não existem, insere logo depois do primeiro título `#`;
    - rodar duas vezes não muda o arquivo (idempotente), conferido por um teste;
-   - ignora `node_modules/`, `kit-gates/` e o `TASK.md`.
+   - ignora `node_modules/` e `kit-gates/` (o kit não é nosso).
 
 ### Fase 10: registro de incidentes
 
@@ -319,17 +320,17 @@ Toda a documentação é em pt-BR, com TOC no início de cada `.md`.
 |---|---|
 | `Makefile`, `mise.toml`, `package.json` (raiz) | criar |
 | `scripts/up.sh`, `scripts/down.sh`, `scripts/status.sh`, `scripts/check-os.sh`, `scripts/check-dependencies.sh`, `scripts/install.sh`, `scripts/lib/*.sh` | criar |
-| `scripts/gates.mjs`, `scripts/toc.mjs` | criar |
+| `scripts/gates.mjs`, `scripts/toc.mjs`, `scripts/check-docs.mjs`, `scripts/verificar-violacoes.sh` | criar |
 | `eslint.config.mjs`, `.dependency-cruiser.cjs`, `knip.json` | criar |
 | `.githooks/pre-commit` | criar |
 | `api/Dockerfile`, `web/Dockerfile`, `.dockerignore` | criar |
 | `docker-compose.yml` | parametrizar |
-| `.gitignore` | adicionar `.run/` e `web/.env` |
+| `.gitignore` | adicionar `.run/` (o `.env` já era ignorado em qualquer pasta) |
 | `api/.env.example`, `web/.env.example` | atualizar/criar |
 | `api/prisma/seed.ts` | tornar idempotente |
 | `api/src/**`, `web/src/**` | refatorar (Fase 6), sem mudar pastas e entradas fixas |
-| `harness/violacoes-proprias/` | criar |
-| `api/test/integration/*`, `tests/e2e/*` | criar |
+| `harness/violacoes-proprias/`, `harness/violacoes-extras/` | criar |
+| `api/test/integration/*`, `tests/e2e/*`, `tests/harness/*` | criar |
 | `AGENTS.md`, `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `REQUIREMENTS.md`, `docs/**` | criar ou reescrever |
 | `blackbox/`, `kit-gates/` | não alterar |
 
