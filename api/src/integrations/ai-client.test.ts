@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyFake, classifyTicket, suggestReplyFake } from './ai-client'
+import { classifyFake, createAiClient, suggestReplyFake } from './ai-client'
 
 describe('classifyFake', () => {
   it('classifica cobrança como billing', () => {
@@ -58,8 +58,19 @@ describe('classifyFake', () => {
 
 describe('classifyTicket', () => {
   it('usa o fake por padrão', async () => {
-    const result = await classifyTicket({ title: 'Reembolso', description: 'Quero o reembolso da compra' })
+    const result = await createAiClient().classifyTicket({ title: 'Reembolso', description: 'Quero o reembolso da compra' })
     expect(result.category).toBe('billing')
+  })
+})
+
+describe('createAiClient', () => {
+  it('sugere a resposta padrão no modo fake', async () => {
+    const suggestion = await createAiClient({ mode: 'fake' }).suggestReply({
+      customerName: 'Ana',
+      title: 'Erro',
+      description: 'qualquer coisa',
+    })
+    expect(suggestion).toBe('Olá, Ana! Recebemos o seu chamado "Erro" e a nossa equipe já está analisando.')
   })
 })
 

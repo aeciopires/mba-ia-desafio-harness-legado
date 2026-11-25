@@ -47,12 +47,21 @@ export function suggestReplyFake(input: { customerName: string; title: string })
   return `Olá, ${input.customerName}! Recebemos o seu chamado "${input.title}" e a nossa equipe já está analisando.`
 }
 
-function openaiClient() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+export type AiConfig = {
+  /** "openai" usa a OpenAI; qualquer outro valor (padrão "fake") usa as regras por palavra-chave. */
+  mode?: string
+  apiKey?: string
 }
 
-async function classifyWithOpenAI(ticket: TicketInput): Promise<Classification> {
-  const completion = await openaiClient().chat.completions.create({
+type SuggestReplyInput = { customerName: string; title: string; description: string }
+
+export interface AiClient {
+  classifyTicket(ticket: TicketInput): Promise<Classification>
+  suggestReply(input: SuggestReplyInput): Promise<string>
+}
+
+async function classifyWithOpenAI(openai: OpenAI, ticket: TicketInput): Promise<Classification> {
+  const completion = await openai.chat.completions.create({
     model: MODEL,
     response_format: { type: 'json_object' },
     messages: [
@@ -72,23 +81,27 @@ async function classifyWithOpenAI(ticket: TicketInput): Promise<Classification> 
   return { category: data.category, priority: data.priority }
 }
 
-export async function classifyTicket(ticket: TicketInput): Promise<Classification> {
-  if (process.env.AI_MODE === 'openai') {
-    return classifyWithOpenAI(ticket)
-  }
-  return classifyFake(ticket)
+async function suggestWithOpenAI(openai: OpenAI, input: SuggestReplyInput) {
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [
+      { role: 'system', content: 'Você é um atendente de suporte educado. Escreva uma resposta curta em português.' },
+      { role: 'user', content: `Cliente: ${input.customerName}\nTítulo: ${input.title}\n\n${input.description}` },
+    ],
+  })
+  return completion.choices[0].message.content || ''
 }
 
-export async function suggestReply(input: { customerName: string; title: string; description: string }) {
-  if (process.env.AI_MODE === 'openai') {
-    const completion = await openaiClient().chat.completions.create({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: 'Você é um atendente de suporte educado. Escreva uma resposta curta em português.' },
-        { role: 'user', content: `Cliente: ${input.customerName}\nTítulo: ${input.title}\n\n${input.description}` },
-      ],
-    })
-    return completion.choices[0].message.content || ''
+export function createAiClient(config: AiConfig = {}): AiClient {
+  if (config.mode === 'openai') {
+    const openai = new OpenAI({ apiKey: config.apiKey })
+    return {
+      classifyTicket: (ticket) => classifyWithOpenAI(openai, ticket),
+      suggestReply: (input) => suggestWithOpenAI(openai, input),
+    }
   }
-  return suggestReplyFake(input)
+  return {
+    classifyTicket: async (ticket) => classifyFake(ticket),
+    suggestReply: async (input) => suggestReplyFake(input),
+  }
 }

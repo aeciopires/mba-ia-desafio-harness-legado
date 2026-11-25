@@ -1,7 +1,7 @@
-import { app } from './http/app'
+import { env } from './config/env'
+import { buildServices } from './container'
+import { createApp } from './http/app'
 
-const port = process.env.PORT || 4000
-
-app.listen(port, () => {
-  console.log(`API rodando em http://localhost:${port}`)
+createApp(buildServices()).listen(env.PORT, () => {
+  console.log(`API rodando na porta ${env.PORT}`)
 })

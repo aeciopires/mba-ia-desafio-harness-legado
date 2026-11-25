@@ -2,8 +2,9 @@ export function formatDate(iso: string) {
   return new Date(iso).toLocaleString('pt-BR')
 }
 
-export function formatCurrency(value: number) {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+/** Mensagem de um erro capturado em catch, que pode não ser um Error. */
+export function errorMessage(err: unknown) {
+  return err instanceof Error ? err.message : String(err)
 }
 
 export function formatBytes(bytes: number) {

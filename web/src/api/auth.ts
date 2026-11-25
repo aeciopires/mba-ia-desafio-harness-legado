@@ -1,10 +1,11 @@
 import { apiFetch } from './client'
+import type { Role } from '../types/ticket'
 
 export type User = {
   id: string
   name: string
   email: string
-  role: 'customer' | 'agent' | 'admin'
+  role: Role
 }
 
 export function getCurrentUser(): User | null {
