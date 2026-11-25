@@ -74,3 +74,25 @@ describe('PrismaTicketRepository', () => {
     expect(found?.originalName).toBe('print.png')
   })
 })
+
+describe('fila de triagem do worker', () => {
+  beforeAll(async () => {
+    await cleanDatabase()
+  })
+
+  afterAll(async () => {
+    await prisma.$disconnect()
+  })
+
+  it('devolve só os pendentes, do mais antigo para o mais novo, até o limite', async () => {
+    const customer = await userRepository.create({ name: 'Fila', email: 'fila@teste.dev', passwordHash: 'x' })
+    const ids: string[] = []
+    for (let i = 0; i < 3; i++) {
+      ids.push((await ticketRepository.create({ title: `Fila ${i}`, description: 'Descrição da fila', customerId: customer.id })).id)
+    }
+    await ticketRepository.update(ids[1], { triageStatus: 'done', category: 'other', priority: 'low' })
+    const pendentes = await ticketRepository.findPendingTriage(10)
+    expect(pendentes.map((t) => t.id)).toEqual([ids[0], ids[2]])
+    expect(await ticketRepository.findPendingTriage(1)).toHaveLength(1)
+  })
+})
