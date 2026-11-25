@@ -1,0 +1,4 @@
+export async function carregaBanco(): Promise<unknown> {
+  const modulo = await import('../../repositories/prisma')
+  return modulo.prisma
+}

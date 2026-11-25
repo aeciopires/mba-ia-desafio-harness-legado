@@ -1,0 +1,4 @@
+export default function CartaoChamado({ titulo }: { titulo: string }) {
+  const tamanho: number = titulo
+  return <div>{tamanho}</div>
+}

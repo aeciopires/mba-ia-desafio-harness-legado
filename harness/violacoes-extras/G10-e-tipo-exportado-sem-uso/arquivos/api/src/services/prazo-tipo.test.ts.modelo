@@ -1,0 +1,8 @@
+import { describe, expect, it } from 'vitest'
+import { dobra } from './prazo-tipo'
+
+describe('dobra', () => {
+  it('dobra as horas', () => {
+    expect(dobra(2)).toBe(4)
+  })
+})

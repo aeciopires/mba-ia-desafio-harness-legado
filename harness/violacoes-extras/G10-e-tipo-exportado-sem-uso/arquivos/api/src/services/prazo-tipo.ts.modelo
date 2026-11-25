@@ -1,0 +1,5 @@
+export type PrazoTipo = { horas: number }
+
+export function dobra(horas: number): number {
+  return horas * 2
+}

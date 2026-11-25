@@ -1,0 +1,3 @@
+import type { Y } from './tipo-y'
+
+export type X = { y?: Y }

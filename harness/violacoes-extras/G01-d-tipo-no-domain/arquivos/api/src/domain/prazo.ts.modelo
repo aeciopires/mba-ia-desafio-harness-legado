@@ -1,0 +1,5 @@
+export interface Prazo {
+  horas: number
+}
+
+export const PADRAO: Prazo = { horas: '24' }

@@ -1,0 +1,1 @@
+export const intervalo = globalThis.process.env.TRIAGE_INTERVAL_MS

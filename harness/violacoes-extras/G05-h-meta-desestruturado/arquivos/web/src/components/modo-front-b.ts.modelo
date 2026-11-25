@@ -1,0 +1,3 @@
+const { env } = import.meta
+
+export const modoB: string = env.MODE

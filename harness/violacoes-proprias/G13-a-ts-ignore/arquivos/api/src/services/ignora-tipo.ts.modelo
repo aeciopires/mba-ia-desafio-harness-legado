@@ -1,0 +1,4 @@
+export function total(): number {
+  // @ts-ignore
+  return 'muitos'
+}

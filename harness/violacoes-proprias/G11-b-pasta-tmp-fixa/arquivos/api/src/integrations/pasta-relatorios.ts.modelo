@@ -1,0 +1,1 @@
+export const PASTA_RELATORIOS = '/tmp/balcao/relatorios'

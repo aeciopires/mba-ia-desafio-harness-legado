@@ -1,0 +1,5 @@
+import type { ChatCompletion } from 'openai/resources/chat/completions'
+
+export function texto(c: ChatCompletion): string {
+  return c.choices[0].message.content ?? ''
+}

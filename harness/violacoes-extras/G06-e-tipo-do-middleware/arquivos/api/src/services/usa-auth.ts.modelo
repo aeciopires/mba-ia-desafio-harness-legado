@@ -1,0 +1,3 @@
+import type { requireAuth } from '../http/middlewares/auth'
+
+export type Middleware = typeof requireAuth

@@ -1,0 +1,8 @@
+import { describe, expect, it } from 'vitest'
+import { classifyFake } from './ai-client'
+
+describe('classificação extra', () => {
+  it('erra de propósito', () => {
+    expect(classifyFake({ title: 'Boleto', description: 'segunda via do boleto' }).category).toBe('technical')
+  })
+})

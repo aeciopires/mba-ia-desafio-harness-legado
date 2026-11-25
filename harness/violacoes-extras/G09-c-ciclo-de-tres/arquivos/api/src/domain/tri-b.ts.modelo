@@ -1,0 +1,3 @@
+import { c } from './tri-c'
+
+export const b = (): number => c() + 1

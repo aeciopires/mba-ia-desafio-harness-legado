@@ -1,0 +1,8 @@
+import { PrismaClient } from '@prisma/client'
+
+const banco = new PrismaClient()
+
+export async function apagarRespostasAntigas(): Promise<number> {
+  const r = await banco.reply.deleteMany({ where: { body: '' } })
+  return r.count
+}

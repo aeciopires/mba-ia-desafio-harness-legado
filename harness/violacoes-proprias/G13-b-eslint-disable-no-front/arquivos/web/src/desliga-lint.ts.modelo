@@ -1,0 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function qualquer(valor: any): string {
+  return String(valor)
+}
