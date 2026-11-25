@@ -31,9 +31,9 @@ flowchart LR
   atendente([Atendente]) --> web
   admin([Admin]) --> web
   web -->|HTTP /api| api[API<br/>Express]
-  api -->|Prisma| db[(Postgres)]
   api -->|grava arquivos| anexos[[Pasta de anexos]]
-  worker[Worker de triagem] -->|lê pendentes e grava a classificação| db
+  api -->|Prisma| db[(Postgres)]
+  db <-->|chamados pendentes<br/>e classificação| worker[Worker de triagem]
   worker -->|classifica| ia{{IA<br/>fake por padrão}}
 ```
 
@@ -78,17 +78,15 @@ flowchart TB
   config["config/: env.ts"]
   container["container.ts (gerente)"]
 
-  rotas --> regras
-  regras --> repos
-  regras --> ia
-  container --> regras
-  container --> repos
-  container --> ia
-  container --> config
+  container -->|"monta os serviços<br/>com repositórios e IA"| rotas
+  rotas -->|chama| regras
+  regras -->|usa| repos
+  regras -->|usa| ia
+  repos -->|lê| config
+  container -->|lê| config
   rotas -.-> domain
   regras -.-> domain
   repos -.-> domain
-  repos --> config
 ```
 
 O que cada seta proibida significa, e qual gate barra:

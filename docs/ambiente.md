@@ -33,22 +33,31 @@ Em outro Linux, o `make up` só avisa e tenta seguir; `make check-os` falha.
 
 ```mermaid
 flowchart TD
-  A[make up] --> B{sistema suportado?}
-  B -- não --> B1[avisa e segue]
-  B -- sim --> C
-  B1 --> C[confere git, docker, compose e Node 22+]
-  C --> D[npm ci onde o lockfile mudou<br/>+ prisma generate]
-  D --> E[git config core.hooksPath .githooks<br/>hook de pre-commit ativo]
-  E --> F{.run/ports.env existe<br/>e a cópia está no ar?}
-  F -- sim --> G[reaproveita as portas]
-  F -- não --> H[escolhe portas livres<br/>API 4000+, front 5173+, banco 5432+]
-  G --> I[gera .run/compose.env]
-  H --> I
-  I --> J[docker compose -p balcao-pasta-hash up -d --build]
-  J --> K[db saudável → migrate: migrations + seed idempotente]
-  K --> L[api, worker e web]
-  L --> M[espera /api/health e o front responderem]
-  M --> N[mostra API, front, banco e pasta de anexos]
+  subgraph p1["1. Conferir"]
+    direction LR
+    A([make up]) --> B{"sistema<br/>suportado?"}
+    B -- não --> B1[só avisa]
+    B -- sim --> C["git, docker,<br/>compose, Node 22+"]
+    B1 --> C
+  end
+  subgraph p2["2. Preparar o host"]
+    direction LR
+    D["npm ci onde o<br/>lockfile mudou"] --> E["prisma<br/>generate"] --> E2["ativa o hook<br/>(core.hooksPath)"]
+  end
+  subgraph p3["3. Portas da cópia"]
+    direction LR
+    F{"cópia já<br/>no ar?"} -- sim --> G["reaproveita<br/>.run/ports.env"]
+    F -- não --> H["escolhe livres<br/>4000+ / 5173+ / 5432+"]
+  end
+  subgraph p4["4. Containers do projeto"]
+    direction LR
+    J["compose up<br/>--build"] --> K["db saudável"] --> K2["migrate:<br/>migrations + seed"] --> L["api, worker<br/>e web"]
+  end
+  subgraph p5["5. Pronto"]
+    direction LR
+    M["espera API<br/>e front"] --> N["mostra endereços,<br/>banco e anexos"]
+  end
+  p1 --> p2 --> p3 --> p4 --> p5
 ```
 
 Exemplo de saída:

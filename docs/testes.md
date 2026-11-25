@@ -18,7 +18,9 @@ flowchart TB
   bb["caixa-preta: blackbox/<br/>make test-blackbox (~20 s)"]
   int["integração: api/test/integration<br/>make test-integration (~6 s)"]
   uni["unitários: api/src/**/*.test.ts<br/>make tests (~1 s, sem banco)"]
-  e2e --> bb --> int --> uni
+  e2e ---|"mais amplo, mais lento"| bb
+  bb --- int
+  int ---|"mais focado, mais rápido"| uni
 ```
 
 | Tipo | Onde | Comando | Precisa |
@@ -64,13 +66,15 @@ sequenceDiagram
   E->>B: git worktree add + make up
   E->>E: portas, banco e anexos diferentes?
   E->>A: isolamento.mjs: chamado, triagem ≤ 15 s, anexo, CORS
-  E->>B: isolamento.mjs: lista não mostra o chamado da A
-  E->>A: blackbox (API A) e blackbox (API B)
+  E->>B: isolamento.mjs: não vê o chamado nem o anexo da A
+  E->>A: blackbox contra a API A
+  E->>B: blackbox contra a API B
   E->>A: gates, kit-gates, violações extras e próprias
   E->>A: hook bloqueia erro de tipo e variável sem uso
   E->>B: make down → A continua respondendo → make up de novo
   E->>E: AGENTS.md, CLAUDE.md, README, incidentes, pastas fixas
-  E->>A: make down (as duas)
+  E->>A: make down
+  E->>B: make down
 ```
 
 Para usar a suíte caixa-preta do repositório base, como o avaliador:
